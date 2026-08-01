@@ -12,7 +12,7 @@ ImageGen 图片提示词、Google Omni 视频提示词、火山/豆包旁白、�
 
 <div align="center">
 
-<video controls preload="metadata" width="100%" src="https://github.com/fadeaway20242024/vox-video-director/raw/main/assets/showcase/zhenghe-yuanboxiaoshu-30s.mp4"></video>
+https://github.com/user-attachments/assets/5fb6d13a-f1d8-4938-a9c8-059d0faab20e
 
 [打开或下载展示视频](assets/showcase/zhenghe-yuanboxiaoshu-30s.mp4)
 

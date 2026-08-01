@@ -14,7 +14,7 @@ usable by any coding agent (Claude Code, Codex, etc.).
 
 <div align="center">
 
-<video controls preload="metadata" width="100%" src="https://github.com/fadeaway20242024/vox-video-director/raw/main/assets/showcase/zhenghe-yuanboxiaoshu-30s.mp4"></video>
+https://github.com/user-attachments/assets/5fb6d13a-f1d8-4938-a9c8-059d0faab20e
 
 [Open or download the showcase video](assets/showcase/zhenghe-yuanboxiaoshu-30s.mp4)
 
