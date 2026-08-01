@@ -1,25 +1,26 @@
-# Vox Director — Agent Guide
+# Vox Video Director — Agent Guide
 
-This repository is an **agent skill**: a self-contained workflow that turns one
-topic into a finished Vox-style paper-collage video (script → collage keyframes →
-motion → voice-over → music → captions). It is not tied to any single assistant —
-any coding agent that can read instructions and run scripts can drive it.
+This repository is an **agent skill**: a self-contained, human-in-the-loop workflow that turns
+one topic into a Vox-style paper-collage video package (creative concepts → template → beat map
+→ GPT ImageGen still prompts → Google Omni motion prompts → local narration/captions assembly).
+It is not tied to any single assistant — any coding agent that can read instructions and run
+scripts can drive it.
 
 ## How to use it (for the agent)
 
-1. Read **`SKILL.md`** — the full workflow and the two human approval gates.
+1. Read **`SKILL.md`** — it contains the concept/template and beat-map approval gates.
    (`SKILL.zh.md` is the same in Chinese.)
-2. Before writing any prompt, read **`references/`** (prompt structures, the
-   vocabulary/theme bank, and the narrative-beat library).
-3. Work one project at a time under `out/<project>/`, driven by a single
-   `beats.json`. Run the stages in **`scripts/`** in order:
-   `style_bakeoff.py → keyframes.py → clips.py → audio.py → assemble.py`.
+2. Before writing prompts, read `references/beat-layer.md` and
+   `references/prompt-guide.md`.
+3. Work one project at a time under `out/<project>/`, driven by a beat map and an explicit
+   handoff package. The user generates video clips in Google Omni and returns them; then use
+   `scripts/local_assemble.py` with `local_edit.json` for the final voice-and-caption master.
 
 ## Requirements
 
-- `ATLASCLOUD_API_KEY` in the environment — https://www.atlascloud.ai/console/api-keys
 - `ffmpeg` + `ffprobe`
-- Python 3 with `pillow`
+- Python 3
+- Volcengine/Doubao credentials only when generating narration locally (never log them)
 
 ## Agent notes
 

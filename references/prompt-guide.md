@@ -4,6 +4,10 @@ Two prompts decide whether the film reads as a real Vox collage or a moving post
 **image prompt** (makes the collage look) and the **video/motion prompt** (makes it move like
 collage). Get these right and the rest is plumbing.
 
+Current standard handoff: generate the still with GPT ImageGen, attach that still to Google
+Omni, and ask Omni for one short continuous image-to-video shot. Atlas, Agnes, imgw.cc, and
+automatic remote video generation are not part of this handoff.
+
 This one file is the whole **LOOK layer** — the prompt *structures*, the *vocabulary* that
 fills them, and the ready-made *theme presets*. (The **STORY layer** — narrative arcs, pacing,
 shot patterns — is its counterpart `beat-layer.md`.)
@@ -101,15 +105,15 @@ https://docs.bfl.ml/guides/prompting_summary · Midjourney https://docs.midjourn
 
 ---
 
-## 2. Video prompt
+## 2. Google Omni video prompt
 
-The motion prompt turns "pan a poster" into "a living collage". Use the **5-axis** structure
-(this is the structure from the reference cr7 Omni prompt — all five axes matter, especially
-**feel** and **color**, which set mood and palette movement):
+The motion prompt turns "pan a poster" into "a living collage". It assumes the still image is
+already attached to Omni. Use the **5-axis** structure; write motion rather than re-describing
+the whole scene:
 
 ```
-[GOAL] Animate this still into a mixed-media collage MOTION GRAPHIC. Keep it flat 2D paper,
-       NOT 3D, no photoreal.
+[GOAL] Animate the attached still image into a mixed-media collage MOTION GRAPHIC. Preserve
+       flat 2D paper dimensionality and the original layout.
 
 [AXIS 1 · CAMERA]   one smooth continuous move for this shot: {slow push-in | lateral
                     parallax pan | slow rise}.
@@ -124,8 +128,8 @@ The motion prompt turns "pan a poster" into "a living collage". Use the **5-axis
                     sits (aged sepia → bold pop → champion gold).
 
 [CONSTRAINTS] keep the layout, the seal and ALL on-screen text perfectly stable and legible;
-              ONE smooth continuous move — absolutely NO sudden zoom snaps, NO jump-cuts, NO
-              teleporting/re-framing inside the shot; no new objects, no morphing, no drift.
+              ONE smooth continuous move; keep the attached still as the source of truth; end
+              with the elements settled in place.
 ```
 
 ### Techniques
@@ -137,6 +141,10 @@ The motion prompt turns "pan a poster" into "a living collage". Use the **5-axis
   — internal jump-cuts.
 - **Never write "snap / punch-in / slam / quick zoom".** Omni over-reacts and generates a
   jump *inside* the shot that reads as a one-frame flash. Ask for ONE smooth continuous move.
+- **Do not write a second scene or a per-second timeline.** Omni should animate the supplied
+  still, not storyboard a new sequence.
+- **Use one camera move plus one dominant element action.** Layered paper pieces may move
+  together, but the camera path itself stays singular.
 - **Don't rely on the video model for text** — it's already baked in the keyframe; just tell
   the model to keep it stable.
 - **One move per shot.** For richer editing, cut between multiple short shots (wide + detail)
@@ -187,11 +195,10 @@ glossary https://www.studiobinder.com/blog/different-types-of-camera-movements-i
 
 ## 3. Layering
 
-Common question: *"can I feed a background + separate component images to the video model to
-get dramatic component motion?"* In practice, no — Omni/Kling `reference-to-video` is
-**generative**, not a layer compositor: it reinterprets the refs and invents its own motion,
-so you get *less* control, not more. For controlled per-element choreography, use the local
-engine (`references/local-engine.md`).
+Common question: *"can I feed a background + separate component images to Omni to get dramatic
+component motion?"* Treat the attached still as the source of truth. Omni is generative, not a
+deterministic layer compositor, so provide one well-layered still and ask for subtle paper
+parallax. For a more complex sequence, split it into multiple shots and cut them in post.
 
 But there's a real lever within the standard path: **the more clearly layered your keyframe
 is, the more layered motion the video model can produce.** Distinct cut-outs with edges and
@@ -201,19 +208,16 @@ prompt (§1) if you want livelier auto-motion.
 
 ---
 
-## 4. Real people
+## 4. Real people (legacy/exception handling)
 
-Real-person keyframes are fine to *generate* (use web-search grounding or a reference photo
-with an edit model to anchor the face). The catch is *animation*: Google (Omni) and ByteDance
-(Seedance) refuse recognizable celebrities / brand logos ("prohibited contents" /
-"digital-rights"). Two ways through:
-- **Kling O3 pro** allows real people — set it as `video_model` (simplest).
-- **Local engine** — animating cut-outs frame-by-frame never touches a video model's content
-  filter, and gives full control. Best when you also want dramatic element choreography.
+Real-person keyframes may be generated when the user has the rights and the model accepts the
+request. If Omni refuses or the subject is rights-sensitive, tell the user and ask for a
+different subject or an authorized non-identifying treatment. Do not silently route the shot to
+another remote video provider; that is outside the standard pipeline.
 
 ---
 
-## 4b. C-roll anchor locks (photo → poster, validated 2026-07-17)
+## 4b. C-roll anchor locks (legacy reference; not the standard handoff)
 
 C-roll's whole trick is one photographic sticker that never gets redrawn while the paper
 world is generated around it. Three lock templates, each earned by a failed generation

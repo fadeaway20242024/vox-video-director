@@ -14,7 +14,7 @@ import sys
 from provider import get_provider, run_jobs
 from styles import resolve_theme, resolve_video_aspect
 
-VIDEO_MODEL = "google/gemini-omni-flash/image-to-video"
+VIDEO_MODEL = "agnes-video-v2.0"
 
 
 def shots_of(beat):
@@ -156,15 +156,7 @@ def run(project_dir, only=None):
             else:
                 prompt = painterly_prompt(shot.get("motion", camera))
             dur = int(shot.get("dur", 10))
-            if "seedance" in model:                 # ratio (not aspect_ratio); real-person OK
-                params = dict(image=url, duration=dur, ratio=aspect,
-                              resolution=vid_res, generate_audio=False)
-            elif "kling-video-o3-pro/reference-to-video" in model:  # has an aspect_ratio enum
-                params = dict(image=url, duration=dur, aspect_ratio=aspect, sound=False)
-            elif "kling" in model:                   # image-to-video / video-edit: follows input; allows real people
-                params = dict(image=url, duration=dur, sound=False)
-            else:                                    # gemini omni flash
-                params = dict(image=url, duration=dur, aspect_ratio=aspect, resolution="720p")
+            params = dict(image=url, duration=dur, aspect_ratio=aspect, resolution=vid_res)
             specs[key] = (lambda m=model, p=prompt, pr=params: prov.submit_video(m, p, **pr))
             by_key[key] = shot
             print(f"[{key}] queued ({dur}s, {model.split('/')[1]})")

@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-Assembly stage (ffmpeg): multi-shot clips + per-beat narration + music -> final.mp4
+Assembly stage (ffmpeg): multi-shot clips + narration + optional music -> final.mp4
 
 Model: beats -> shots. Each shot is one short clip (its own cut). Narration and
-captions are per BEAT and span all the beat's shots, so the voice stays aligned
-while the visuals cut. BGM is ducked under the narration. Captions + watermark
-are Pillow PNGs composited with `overlay` (this ffmpeg has no libass/drawtext).
+captions can be per BEAT, or narration can be one full-track doc["narration_audio"].
+Optional BGM is ducked under narration. Captions + watermark are Pillow PNGs
+composited with `overlay` (this ffmpeg has no libass/drawtext).
 
 Usage: python3 assemble.py <project_dir>   (default: out/tang-30s)
 """
@@ -17,7 +17,7 @@ import sys
 import text_overlay
 
 FPS, TAIL = 24, 0.5
-WATERMARK = "Made with Atlas Cloud · vox-director"
+WATERMARK = "Made with vox-director"
 RES = {"16:9": (1920, 1080), "9:16": (1080, 1920), "1:1": (1080, 1080)}
 
 
@@ -118,7 +118,7 @@ def run(project_dir):
             cap_pngs.append(p)
     wm_png = text_overlay.render_watermark(wm_text, os.path.join(tmp, "wm.png"), W, H)
 
-    # ---- 4) one pass: overlay captions+wm, mix per-beat narration, duck BGM ----
+    # ---- 4) one pass: overlay captions+wm, mix narration, optional ducked BGM ----
     nb = len(beat_spans)
     ncap = len(cap_pngs)                        # 0 when captions are off
     inputs = ["-i", body]                       # 0
@@ -126,10 +126,18 @@ def run(project_dir):
         inputs += ["-i", p]                     # 1..ncap
     inputs += ["-i", wm_png]                    # ncap+1
     narr_base = ncap + 2
-    for bs in beat_spans:
-        inputs += ["-i", bs["beat"]["narration_audio"]]   # narr inputs
-    bgm_idx = narr_base + nb
-    inputs += ["-i", doc["bgm_path"]]
+    full_narration = doc.get("narration_audio")
+    if full_narration:
+        inputs += ["-i", full_narration]
+        next_idx = narr_base + 1
+    else:
+        for bs in beat_spans:
+            inputs += ["-i", bs["beat"]["narration_audio"]]   # narr inputs
+        next_idx = narr_base + nb
+    bgm_idx = None
+    if doc.get("bgm_path"):
+        bgm_idx = next_idx
+        inputs += ["-i", doc["bgm_path"]]
 
     chain, prev = [], "[0:v]"
     for i, bs in enumerate(beat_spans[:ncap]):
@@ -139,20 +147,26 @@ def run(project_dir):
         prev = lbl
     chain.append(f"{prev}[{ncap+1}:v]overlay=0:0[v]")
 
-    # per-beat narration delayed to its start, then mixed
-    nlabels = []
-    for i, bs in enumerate(beat_spans):
-        ms = int(bs["start"] * 1000)
-        chain.append(f"[{narr_base+i}:a]adelay={ms}:all=1[n{i}]")
-        nlabels.append(f"[n{i}]")
-    # pad the narration mix to the FULL duration, else sidechaincompress follows the (shorter)
-    # narration length and -shortest clips the tail (e.g. a silent payoff/ending beat).
-    chain.append(f"{''.join(nlabels)}amix=inputs={nb}:normalize=0:duration=longest,volume={voice_vol},apad,atrim=0:{total}[narrmix]")
-    # a filter-output label can only be consumed once -> split narration in two
-    chain.append("[narrmix]asplit=2[narrA][narrB]")
-    chain.append(f"[{bgm_idx}:a]atrim=0:{total},volume={music_vol},afade=t=out:st={max(total-2,0):.2f}:d=2[bgt]")
-    chain.append("[bgt][narrA]sidechaincompress=threshold=0.02:ratio=12:attack=5:release=350[bgd]")
-    chain.append(f"[narrB][bgd]amix=inputs=2:normalize=0:duration=longest,volume=1.4,atrim=0:{total}[a]")
+    if full_narration:
+        chain.append(f"[{narr_base}:a]volume={voice_vol},apad,atrim=0:{total}[narrmix]")
+    else:
+        nlabels = []
+        for i, bs in enumerate(beat_spans):
+            ms = int(bs["start"] * 1000)
+            chain.append(f"[{narr_base+i}:a]adelay={ms}:all=1[n{i}]")
+            nlabels.append(f"[n{i}]")
+        # pad the narration mix to the FULL duration, else sidechaincompress follows the
+        # shorter narration length and -shortest clips the tail.
+        chain.append(f"{''.join(nlabels)}amix=inputs={nb}:normalize=0:duration=longest,volume={voice_vol},apad,atrim=0:{total}[narrmix]")
+
+    if bgm_idx is not None:
+        # a filter-output label can only be consumed once -> split narration in two
+        chain.append("[narrmix]asplit=2[narrA][narrB]")
+        chain.append(f"[{bgm_idx}:a]atrim=0:{total},volume={music_vol},afade=t=out:st={max(total-2,0):.2f}:d=2[bgt]")
+        chain.append("[bgt][narrA]sidechaincompress=threshold=0.02:ratio=12:attack=5:release=350[bgd]")
+        chain.append(f"[narrB][bgd]amix=inputs=2:normalize=0:duration=longest,volume=1.4,atrim=0:{total}[a]")
+    else:
+        chain.append("[narrmix]volume=1.4[a]")
     filt = ";".join(chain)
 
     final = os.path.join(project_dir, "final.mp4")

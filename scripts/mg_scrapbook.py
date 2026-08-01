@@ -80,7 +80,7 @@ def run(project_dir):
         doc = json.load(f)
     beats = doc["beats"]
     W, H = RES.get(doc.get("aspect", "9:16"), (1080, 1920))
-    wm_text = doc.get("watermark", "Made with Atlas Cloud · vox-director")
+    wm_text = doc.get("watermark", "Made with vox-director")
     confetti = os.path.join(project_dir, "assets", "confetti.mp4")
     tmp = os.path.join(project_dir, "_seg"); os.makedirs(tmp, exist_ok=True)
 

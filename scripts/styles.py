@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Per-era style bible for vox-director (validated on Atlas Cloud / Nano Banana 2).
+Per-era style bible for vox-director.
 
 Each STYLE_BASE is scene-agnostic: it fixes ONLY the visual idiom of a dynasty.
 compose_keyframe_prompt() appends the beat's scene + a shared bilingual
@@ -154,7 +154,7 @@ def resolve_theme(name):
     return THEME_PRESETS.get(name)
 
 
-# GPT-Image takes absolute size + quality; nano-banana/seedream/etc take aspect_ratio + resolution.
+# Legacy helper retained for scripts that still compose image prompt metadata.
 _GPT_SIZE = {
     "16:9": {"1k": "1536x1024", "2k": "2048x1152", "4k": "3840x2160"},
     "9:16": {"1k": "1024x1536", "2k": "1152x2048", "4k": "2160x3840"},
@@ -166,8 +166,7 @@ _GPT_QUALITY = {"1k": "medium", "2k": "high", "4k": "high"}
 
 
 def image_params(model, aspect="16:9", resolution="1k"):
-    """Per-model text-to-image params. GPT-Image needs size+quality; most other
-    text-to-image models (nano-banana, seedream, ...) take aspect_ratio + resolution."""
+    """Per-model text-to-image params. Retained for legacy prompt metadata."""
     if "gpt-image" in model:
         return {"size": _GPT_SIZE.get(aspect, {}).get(resolution, "1024x1024"),
                 "quality": _GPT_QUALITY.get(resolution, "medium")}
@@ -178,12 +177,7 @@ def image_params(model, aspect="16:9", resolution="1k"):
 # Each video model natively accepts a fixed enum of aspect ratios, or none at all
 # (it just follows whatever the input image/video already is). None = "follows input".
 VIDEO_ASPECT_SUPPORT = {
-    "gemini-omni-flash/image-to-video": ["16:9", "9:16"],
-    "gemini-omni-flash/video-edit": None,
-    "seedance-2.0/reference-to-video": ["16:9", "9:16", "1:1", "4:3", "3:4", "21:9", "9:21", "adaptive"],
-    "kling-video-o3-pro/reference-to-video": ["16:9", "9:16", "1:1"],
-    "kling-video-o3-pro/image-to-video": None,
-    "kling-video-o3-pro/video-edit": None,
+    "agnes-video-v2.0": ["16:9", "9:16", "1:1", "4:3", "3:4"],
 }
 
 

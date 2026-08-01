@@ -22,9 +22,6 @@ import os
 import subprocess
 import sys
 
-import atlas_cloud
-from provider import get_provider
-
 # Both Omni video-edit and Kling video-edit cap a single call at 10s; leave headroom
 # so a beat that lands right on the limit doesn't get rejected for being 10.0s exactly.
 MAX_BEAT_DUR = 9.5
@@ -101,56 +98,10 @@ def segment_words(words, max_dur=MAX_BEAT_DUR, min_dur=MIN_BEAT_DUR, pause_gap=P
 
 def run(project_dir, source, language=None, keyterm=None, max_beat_dur=MAX_BEAT_DUR,
         provider_name=None):
-    os.makedirs(project_dir, exist_ok=True)
-    bpath = os.path.join(project_dir, "beats.json")
-
-    dims = probe_dims(source)
-    aspect = nearest_named_aspect(*dims) if dims else "9:16"
-
-    audio_path = source
-    if not source.lower().endswith((".mp3", ".wav", ".m4a", ".flac", ".ogg")):
-        audio_path = os.path.join(project_dir, "asr_audio.mp3")
-        print(f"extracting audio -> {audio_path}")
-        extract_audio(source, audio_path)
-
-    prov = get_provider(provider_name)
-    print("uploading audio for ASR...")
-    audio_url = prov.upload(audio_path)
-    print("transcribing (xai/stt-v1)...")
-    result = atlas_cloud.transcribe(audio_url, language=language,
-                                    keyterm=keyterm.split(",") if keyterm else None)
-    words = result.get("words", [])
-    if not words:
-        raise SystemExit("ASR returned no word timestamps -- check the source audio")
-
-    segments = segment_words(words, max_dur=max_beat_dur)
-    beats = [{
-        "id": i + 1,
-        "start": s["start"],
-        "end": s["end"],
-        "dur": round(s["end"] - s["start"], 2),
-        "text": s["text"],
-        "content_beats": "",   # optional: fill in per-beat sticker/stamp/overlay ideas
-    } for i, s in enumerate(segments)]
-
-    doc = {
-        "project": os.path.basename(project_dir.rstrip("/")),
-        "mode": "aroll",
-        "source_video": os.path.abspath(source),
-        "language": result.get("language") or language or "en",
-        "aspect": aspect,
-        "style": "collage",
-        "theme": None,                                    # fill in after a style bake-off
-        "video_model": "google/gemini-omni-flash/video-edit",
-        "video_model_fallback": "bytedance/seedance-2.0/reference-to-video",
-        "transcript": result.get("text", ""),
-        "beats": beats,
-    }
-    with open(bpath, "w") as f:
-        json.dump(doc, f, ensure_ascii=False, indent=2)
-    print(f"wrote {len(beats)} beats -> {bpath}")
-    print("review/edit theme + content_beats, then run aroll_clips.py "
-          "(this draft is the approval gate -- don't generate off it unreviewed).")
+    raise SystemExit(
+        "asr_beats.py is disabled in the no-Atlas workflow. Provide a transcript/beat map manually "
+        "or connect a non-Atlas STT service before using A-roll."
+    )
 
 
 if __name__ == "__main__":

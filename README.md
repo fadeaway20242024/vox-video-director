@@ -1,12 +1,16 @@
 <p align="right"><b>English</b> · <a href="README.zh.md">简体中文</a></p>
 
-# 🎬 Vox Director
+# 🎬 Vox Video Director
 
-**Turn one topic into a finished Vox-style paper-collage explainer / ad video — script, collage keyframes, motion, voice-over, music and captions, all automated.**
+**Turn one topic into a controlled Vox-style paper-collage video package — concepts, template,
+ImageGen still prompts, Google Omni motion prompts, Volcengine/Doubao narration, captions and
+local assembly.**
 
-An **agent skill** that runs end to end on the [Atlas Cloud](https://www.atlascloud.ai/?utm_source=github&utm_campaign=vox_director) API + local `ffmpeg`, usable by any coding agent (Claude Code, Codex, etc.). You give it a one-line topic; it gives you an `mp4`.
+An **agent skill** for a human-in-the-loop workflow. The user generates the Omni video clips and
+returns them; the skill creates the clean voice-and-subtitle master with local `ffmpeg`. It is
+usable by any coding agent (Claude Code, Codex, etc.).
 
-![License: MIT](https://img.shields.io/badge/License-MIT-black.svg) ![Powered by Atlas Cloud](https://img.shields.io/badge/powered%20by-Atlas%20Cloud-ff5a1f.svg) ![Agent Skill](https://img.shields.io/badge/Agent-Skill-d97757.svg)
+![License: MIT](https://img.shields.io/badge/License-MIT-black.svg) ![Google Omni handoff](https://img.shields.io/badge/video-Google%20Omni-black.svg) ![Agent Skill](https://img.shields.io/badge/Agent-Skill-d97757.svg)
 
 <div align="center">
 
@@ -46,42 +50,38 @@ One topic flows through one script per stage, all driven by a single `beats.json
 ```
 topic
   │
-  ├─ 1. beat map        pick a narrative arc → write beats.json      ◀── GATE 1: you approve the beat map
-  ├─ 2. style bake-off  render the same beat in 3–4 themes           ◀── GATE 2: you pick the look by eye
-  ├─ 3. keyframes       one collage poster per beat  (nano-banana-2)
-  ├─ 4. motion          animate each poster          (gemini-omni-flash i2v)
-  ├─ 5. voice + music   one narrator (xai/tts) + BGM (minimax/music)
-  ├─ 6. assemble        ffmpeg: concat, duck music under VO, burn captions + watermark
-  └─ final.mp4
+  ├─ 1. concepts        draft 3 creative directions                     ◀── GATE 1: pick one
+  ├─ 2. template        present 2–3 visual grammars                   ◀── GATE 2: pick the look
+  ├─ 3. beat map        write shots, narration and timing              ◀── GATE 3: approve
+  ├─ 4. prompt package  GPT ImageGen still prompts + Google Omni prompts
+  ├─ 5. user renders    generate Omni clips and return them
+  ├─ 6. voice + captions Volcengine/Doubao narration + SRT
+  ├─ 7. assemble        local ffmpeg: concat and burn captions (no music by default)
+  └─ clean-master.mp4
 ```
 
 That flow is **B-roll** — a topic in, everything generated. Two more input modalities reuse the same engine:
 
-- **A-roll — you already have a talking-head video.** It is ASR-segmented into beats and re-styled into the collage look, keeping the real face, lip-sync and gestures frame-for-frame (`gemini-omni-flash/video-edit`, auto-retrying on `seedance-2.0/reference-to-video`).
-- **C-roll — you have one still photo** (a selfie, a product shot). The subject is cut out as a photographic sticker — never redrawn — and each beat's poster is generated around it (`nano-banana-2/edit`). The narration can be cloned into the subject's own voice.
+- **A-roll — legacy/disabled in this fork.** It needs a separate STT/video-edit refactor before use.
+- **C-roll — legacy/disabled in this fork.** Use the standard B-roll imagegen prompt path unless anchored-photo generation is refactored manually.
 
 Two ideas make or break the result, and the skill is built around both:
 
 1. **The look is born in the image step.** Each beat is a finished collage *poster*. All the collage DNA (torn paper, cut-outs, halftone, headline text) lives in that image — if the poster isn't a rich collage, nothing downstream saves it.
 2. **The motion is added after.** By default an AI video model animates the whole poster (the "living poster" path). For dramatic *piece-by-piece* assembly, an optional local keyframe engine cuts the poster into parts and drives them frame-by-frame (no content filters, pixel-exact — great for real people).
 
-Two human decision gates keep you in control (approve the beat map; pick the style); everything else is automated.
+Three human decision gates keep you in control (pick the concept, pick the template, approve
+the beat map); Omni rendering and final narration/assembly then follow the approved package.
 
-## Models (verified on Atlas Cloud)
+## Handoff and finishing
 
-| Job | Model |
+| Job | Standard choice |
 |---|---|
-| Keyframe / collage poster | `google/nano-banana-2/text-to-image` |
-| Animate (non-real content) | `google/gemini-omni-flash/image-to-video` |
-| Animate (**real people / brands**) | `kwaivgi/kling-video-o3-pro/image-to-video` |
-| Re-style a talking-head (A-roll) | `google/gemini-omni-flash/video-edit` |
-| Anchor a photo in the collage (C-roll) | `google/nano-banana-2/edit` |
-| Narration | `xai/tts-v1` |
-| Narration in a real person's voice | `bytedance/seed-audio-1.0` (voice cloning) |
-| Music | `minimax/music-2.6` |
-| Cut out an element (advanced path) | `youchuan/v8.1/remove-background` |
-
-Model IDs drift — the skill fetches the live list from `GET https://api.atlascloud.ai/api/v1/models` before running.
+| Keyframe / collage poster | Codex built-in `imagegen` |
+| Image-to-video | User-run Google Omni |
+| Narration | Volcengine/Doubao, one consistent voice |
+| Captions | Local SRT burned with FFmpeg |
+| Music | Optional open-license research or Suno prompt |
 
 ## Install
 
@@ -89,14 +89,17 @@ This is an **agent skill** — it works with any coding agent that can read a wo
 
 **Option A — from this repo:**
 ```bash
-git clone https://github.com/Alisa0808/vox-director.git ~/.claude/skills/vox-director
+git clone https://github.com/Alisa0808/vox-director.git ~/.claude/skills/vox-video-director
 ```
 
-**Option B — from the packaged skill:** download [`vox-director.skill`](vox-director.skill) and install it via your Claude skills UI.
+**Option B — from the packaged skill:** download [`vox-video-director.skill`](vox-video-director.skill) and install it via your Claude skills UI.
 
-Then set your Atlas Cloud API key (get one at [atlascloud.ai/console/api-keys](https://www.atlascloud.ai/console/api-keys?utm_source=github&utm_campaign=vox_director)):
+If narration is generated locally, set the Volcengine/Doubao variables in your private
+environment (never commit them):
 ```bash
-export ATLASCLOUD_API_KEY="sk-..."
+export DOUBAO_SPEECH_API_KEY="..."
+export DOUBAO_SPEECH_VOICE_TYPE="..."
+export DOUBAO_SPEECH_RESOURCE_ID="..."
 ```
 
 ## Quick start
@@ -105,14 +108,16 @@ Just ask your coding agent, with the skill installed:
 
 > *"Make me a Vox-style collage video introducing Mexican street food — English, 16:9, 15 seconds."*
 
-The agent will draft a beat map for your approval, run a style bake-off for you to pick from, then generate keyframes → motion → voice → music and assemble `out/<project>/final.mp4`.
+The agent will draft 3 concepts and 2–3 templates, then output the approved beat map, GPT
+ImageGen still prompts, and Google Omni prompts. You generate the Omni clips and return them;
+the agent then creates the Volcengine/Doubao voice-and-subtitle clean master locally.
 
 ## Requirements
 
 - A **coding agent** — Claude Code, Codex, or similar
-- **Atlas Cloud** API key
 - **ffmpeg** + **ffprobe** (`brew install ffmpeg`)
-- **Python 3** with **Pillow** (`pip install pillow`) — for caption/watermark overlays
+- **Python 3**
+- Volcengine/Doubao credentials only when local TTS is needed
 
 ## What's in the box
 
@@ -123,8 +128,9 @@ AGENTS.md             entry point for non-Claude agents (Codex, …)
 references/           the creative engine
   prompt-guide.md       the LOOK layer — prompt structures, vocab & 9 theme presets
   beat-layer.md         14 narrative arcs + hook/pacing + shot patterns
-  voices.md             xai/tts voice roster — pick a voice_id per language/tone
-  models-and-gotchas.md every API / ffmpeg gotcha, already solved
+  voices.md             legacy voice notes
+  models-and-gotchas.md legacy provider notes (not standard)
+  local-edit.md          local FFmpeg JSON schema and verification
   local-engine.md       the advanced element-level motion engine
 scripts/              one script per pipeline stage
 examples/             ready-to-run beats.json examples
@@ -137,8 +143,10 @@ Built by **[@alisaqqt](https://x.com/alisaqqt)** — follow for more agent-skill
 
 Inspired by the collage-ad workflows of **[Stav Zilber](https://x.com/StavZilber)**, **[rom1trs](https://x.com/rom1trs)** and **[Higgsfield](https://x.com/higgsfield_ai)**, and by **[Vox](https://www.vox.com)**'s explainer visual language.
 
-Built end to end on **[Atlas Cloud](https://www.atlascloud.ai/?utm_source=github&utm_campaign=vox_director)** — one prompt, one film.
+This local fork is configured for a controlled ImageGen → Google Omni handoff, then local
+Volcengine/Doubao + FFmpeg finishing. Atlas, Agnes, imgw.cc, and automatic remote video
+generation are not part of the standard workflow.
 
 ## License
 
-[MIT](LICENSE) © 2026 Atlas Cloud
+[MIT](LICENSE)

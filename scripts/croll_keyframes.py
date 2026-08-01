@@ -37,7 +37,7 @@ import sys
 from provider import get_provider, run_jobs
 from styles import compose_collage_prompt, resolve_theme, image_params
 
-EDIT_MODEL = "google/nano-banana-2/edit"   # fallback: openai/gpt-image-2/edit
+EDIT_MODEL = "disabled/no-atlas"
 
 FACE_LOCK = (
     "The person's face and hair from the attached photo are cut out as a PHOTOGRAPHIC "
@@ -92,6 +92,11 @@ def shots_of(beat):
 
 
 def run(project_dir):
+    raise SystemExit(
+        "croll_keyframes.py is disabled in the no-Atlas workflow. Use standard B-roll imagegen "
+        "keyframe prompts, or refactor C-roll to a manual/imagegen anchored-keyframe process first."
+    )
+
     bpath = os.path.join(project_dir, "beats.json")
     with open(bpath) as f:
         doc = json.load(f)

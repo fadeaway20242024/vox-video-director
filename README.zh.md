@@ -1,12 +1,14 @@
 <p align="right"><a href="README.md">English</a> · <b>简体中文</b></p>
 
-# 🎬 Vox Director(拼贴动效导演)
+# 🎬 Vox Video Director（拼贴动效导演）
 
-**一个选题进,一条成片出——脚本、拼贴关键帧、动效、旁白、配乐、字幕,全流程自动化的 Vox 风格拼贴讲解/广告视频。**
+**一个选题进，经过创意、模板、分镜和提示词确认，生成 Vox 风格拼贴视频——GPT
+ImageGen 图片提示词、Google Omni 视频提示词、火山/豆包旁白、字幕和本地合成。**
 
-一个**通用 agent 技能**,后端全跑 [Atlas Cloud](https://www.atlascloud.ai/?utm_source=github&utm_campaign=vox_director) API、本地用 `ffmpeg` 合成,任何编码 agent(Claude Code、Codex 等)都能用。你给一句话选题,它给你一个 `mp4`。
+一个**通用 agent 技能**。用户在 Google Omni 生成视频片段并回传，技能再用本地 `ffmpeg`
+完成旁白和字幕纯净版。任何编码 agent（Claude Code、Codex 等）都能用。
 
-![License: MIT](https://img.shields.io/badge/License-MIT-black.svg) ![Powered by Atlas Cloud](https://img.shields.io/badge/powered%20by-Atlas%20Cloud-ff5a1f.svg) ![Agent Skill](https://img.shields.io/badge/Agent-Skill-d97757.svg)
+![License: MIT](https://img.shields.io/badge/License-MIT-black.svg) ![Google Omni handoff](https://img.shields.io/badge/video-Google%20Omni-black.svg) ![Agent Skill](https://img.shields.io/badge/Agent-Skill-d97757.svg)
 
 <div align="center">
 
@@ -46,42 +48,38 @@ https://github.com/user-attachments/assets/ed08d230-7bcb-4b48-a17d-23c079208f9f
 ```
 选题
   │
-  ├─ 1. 分镜脚本   选叙事弧线 → 写 beats.json          ◀── 决策点 1:你确认分镜脚本
-  ├─ 2. 风格试片   同一拍渲成 3–4 种主题               ◀── 决策点 2:你看图挑风格
-  ├─ 3. 关键帧     每拍一张拼贴海报   (nano-banana-2)
-  ├─ 4. 动效       让每张海报动起来   (gemini-omni-flash 图生视频)
-  ├─ 5. 旁白+配乐  统一旁白 (xai/tts) + 背景乐 (minimax/music)
-  ├─ 6. 合成       ffmpeg:拼接、配乐在旁白下自动闪避、烧字幕+水印
-  └─ final.mp4
+  ├─ 1. 创意       输出 3 个创意方案                         ◀── 决策点 1:选择创意
+  ├─ 2. 模板       输出 2–3 个视觉模板                       ◀── 决策点 2:选择风格
+  ├─ 3. 分镜       镜头、旁白、节奏                         ◀── 决策点 3:确认分镜
+  ├─ 4. 提示词     GPT ImageGen 图片提示词 + Google Omni 提示词
+  ├─ 5. 用户生成   在 Omni 生成片段并回传
+  ├─ 6. 旁白字幕   火山/豆包旁白 + SRT
+  ├─ 7. 本地合成   ffmpeg 拼接并烧录字幕（默认无音乐）
+  └─ clean-master.mp4
 ```
 
 上面这条是 **B-roll**——一个选题进去,画面全靠生成。另外两种输入形态复用同一套引擎:
 
-- **A-roll——你已经有一段口播视频。** 它会被 ASR 自动切成段,再整段套上拼贴风格,真人的脸、口型、手势逐帧保留(`gemini-omni-flash/video-edit`,失败自动重试 `seedance-2.0/reference-to-video`)。
-- **C-roll——你只有一张静态照片**(自拍、产品图)。主体被抠成摄影质感的贴纸——绝不重绘——每一段的海报围着它生成(`nano-banana-2/edit`)。旁白还能克隆成主体本人的声音。
+- **A-roll——本 fork 中为旧流程/默认禁用。** 使用前需要另接 STT/视频编辑服务。
+- **C-roll——本 fork 中为旧流程/默认禁用。** 默认请走标准 B-roll 的 imagegen 关键帧流程。
 
 两个关键理念决定成败,技能就是围绕它们搭的:
 
 1. **风格诞生在生图这一步。** 每一拍是一张成品拼贴*海报*,所有拼贴基因(撕纸、剪纸、网点、标题文字)都长在这张图里——图不够拼贴,后面再怎么救也救不回来。
 2. **动效是后加的。** 默认由 AI 视频模型把整张海报动起来(「活海报」路径);要那种戏剧化的**零件逐个飞入拼合**,可选的本地关键帧引擎会把海报拆成零件逐帧驱动(无内容审核、像素级精确,尤其适合真人)。
 
-两个人工决策点让你始终掌控(确认分镜脚本、挑风格),其余全自动。
+三个决策点让你始终掌控（选择创意、选择模板、确认分镜）；之后按已确认的提示词在 Omni
+生成片段，再完成旁白和本地合成。
 
-## 模型(已在 Atlas Cloud 上验证)
+## 交接与收尾
 
-| 用途 | 模型 |
+| 用途 | 标准选择 |
 |---|---|
-| 关键帧 / 拼贴海报 | `google/nano-banana-2/text-to-image` |
-| 动效(非真人内容) | `google/gemini-omni-flash/image-to-video` |
-| 动效(**真人 / 品牌**) | `kwaivgi/kling-video-o3-pro/image-to-video` |
-| 口播视频转拼贴(A-roll) | `google/gemini-omni-flash/video-edit` |
-| 照片锚进拼贴(C-roll) | `google/nano-banana-2/edit` |
-| 旁白 | `xai/tts-v1` |
-| 用真人本人的声音念旁白 | `bytedance/seed-audio-1.0`(声音克隆) |
-| 配乐 | `minimax/music-2.6` |
-| 抠素材(高级路径) | `youchuan/v8.1/remove-background` |
-
-模型 ID 会变——技能运行前会先从 `GET https://api.atlascloud.ai/api/v1/models` 拉取最新列表。
+| 关键帧 / 拼贴海报 | Codex 内置 `imagegen` |
+| 图生视频 | 用户在 Google Omni 生成 |
+| 旁白 | 火山/豆包，统一音色 |
+| 字幕 | 本地 SRT + FFmpeg |
+| 配乐 | 开源音乐检索或 Suno 提示词 |
 
 ## 安装
 
@@ -89,14 +87,16 @@ https://github.com/user-attachments/assets/ed08d230-7bcb-4b48-a17d-23c079208f9f
 
 **方式 A —— 从本仓库:**
 ```bash
-git clone https://github.com/Alisa0808/vox-director.git ~/.claude/skills/vox-director
+git clone https://github.com/Alisa0808/vox-director.git ~/.claude/skills/vox-video-director
 ```
 
-**方式 B —— 用打包好的技能文件:** 下载 [`vox-director.skill`](vox-director.skill),在你的 Claude 技能界面里安装。
+**方式 B —— 用打包好的技能文件:** 下载 [`vox-video-director.skill`](vox-video-director.skill),在你的 Claude 技能界面里安装。
 
-然后设置 Atlas Cloud API key(在 [atlascloud.ai/console/api-keys](https://www.atlascloud.ai/console/api-keys?utm_source=github&utm_campaign=vox_director) 获取):
+如果需要本地生成旁白，在私有环境中设置火山/豆包变量（不要提交到仓库）：
 ```bash
-export ATLASCLOUD_API_KEY="sk-..."
+export DOUBAO_SPEECH_API_KEY="..."
+export DOUBAO_SPEECH_VOICE_TYPE="..."
+export DOUBAO_SPEECH_RESOURCE_ID="..."
 ```
 
 ## 快速开始
@@ -105,14 +105,16 @@ export ATLASCLOUD_API_KEY="sk-..."
 
 > *「做一条 Vox 风格的拼贴视频,介绍墨西哥街头美食——全英文,16:9,15 秒。」*
 
-agent 会先起草分镜脚本给你确认,再跑一轮风格试片让你挑,然后生成关键帧 → 动效 → 旁白 → 配乐,合成 `out/<项目>/final.mp4`。
+agent 会先给出 3 个创意和 2–3 个模板，再输出分镜、ImageGen 图片提示词和 Google Omni
+视频提示词。你在 Omni 生成并回传片段后，agent 用火山/豆包配音、烧录字幕，最后合成本地
+纯净版。
 
 ## 环境要求
 
 - 一个**编码 agent**——Claude Code、Codex 或类似工具
-- **Atlas Cloud** API key
 - **ffmpeg** + **ffprobe**(`brew install ffmpeg`)
-- **Python 3** + **Pillow**(`pip install pillow`)——用于字幕/水印叠加
+- **Python 3**
+- 仅在需要本地 TTS 时准备火山/豆包凭证
 
 ## 目录结构
 
@@ -123,8 +125,9 @@ AGENTS.md             非 Claude agent(Codex 等)的入口
 references/           创意引擎
   prompt-guide.md       画面/LOOK 层:提示词结构 + 词库 + 9 套主题预设
   beat-layer.md         14 种叙事弧线 + 钩子/节奏 + 镜头模式
-  voices.md             xai/tts 音色表 —— 按语种/调性挑 voice_id
-  models-and-gotchas.md 每一个 API / ffmpeg 坑,都已填平
+  voices.md             旧音频说明
+  models-and-gotchas.md 旧 provider 说明（非标准流程）
+  local-edit.md          本地 FFmpeg 配置与验收
   local-engine.md       高级的元素级动效引擎
 scripts/              每个管线阶段一个脚本
 examples/             可直接跑的 beats.json 示例
@@ -137,8 +140,9 @@ assets/               样片
 
 灵感来自 **[Stav Zilber](https://x.com/StavZilber)**、**[rom1trs](https://x.com/rom1trs)**、**[Higgsfield](https://x.com/higgsfield_ai)** 的拼贴广告工作流,以及 **[Vox](https://www.vox.com)** 的讲解片视觉语言。
 
-全流程基于 **[Atlas Cloud](https://www.atlascloud.ai/?utm_source=github&utm_campaign=vox_director)** 构建——一个提示词,一条成片。
+这个本地版本采用可控的 ImageGen → Google Omni 交接，再用火山/豆包 + FFmpeg 收尾。
+Atlas、Agnes、imgw.cc 和自动远程视频生成不属于标准流程。
 
 ## 许可
 
-[MIT](LICENSE) © 2026 Atlas Cloud
+[MIT](LICENSE)

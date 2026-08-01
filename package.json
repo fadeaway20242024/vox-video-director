@@ -1,10 +1,10 @@
 {
-  "name": "vox-director",
+  "name": "vox-video-director",
   "version": "1.0.0",
-  "description": "Vox Director — an open-source Agent Skill that turns one topic into a finished Vox-style paper-collage explainer/ad video: script, collage keyframes, motion, voice-over, music and captions, automated end to end on the Atlas Cloud API + local ffmpeg. Works with Claude Code, Codex, and any SKILL.md agent.",
+  "description": "Vox Director — an open-source Agent Skill for a controlled Vox-style workflow: concepts, templates, beat maps, GPT ImageGen still prompts, Google Omni motion prompts, Volcengine/Doubao narration, SRT captions, and local FFmpeg finishing. Works with Claude Code, Codex, and any SKILL.md agent.",
   "keywords": [
     "vox",
-    "vox-director",
+    "vox-video-director",
     "ai-video",
     "video-generation",
     "text-to-video",
@@ -19,7 +19,7 @@
     "codex",
     "ffmpeg",
     "tts",
-    "atlas-cloud",
+    "google-omni",
     "generative-ai"
   ],
   "homepage": "https://github.com/Alisa0808/vox-director",
