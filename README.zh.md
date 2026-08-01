@@ -12,9 +12,11 @@ ImageGen 图片提示词、Google Omni 视频提示词、火山/豆包旁白、�
 
 <div align="center">
 
-https://github.com/user-attachments/assets/ed08d230-7bcb-4b48-a17d-23c079208f9f
+<video controls preload="metadata" width="100%" src="https://github.com/fadeaway20242024/vox-video-director/raw/main/assets/showcase/zhenghe-yuanboxiaoshu-30s.mp4"></video>
 
-<b>▶《中华文明的变迁》· 30 秒</b>
+[打开或下载展示视频](assets/showcase/zhenghe-yuanboxiaoshu-30s.mp4)
+
+<b>▶《郑和下西洋：一支舰队》· 30 秒 · 火山/豆包旁白</b>
 
 </div>
 

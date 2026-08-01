@@ -14,9 +14,11 @@ usable by any coding agent (Claude Code, Codex, etc.).
 
 <div align="center">
 
-https://github.com/user-attachments/assets/ed08d230-7bcb-4b48-a17d-23c079208f9f
+<video controls preload="metadata" width="100%" src="https://github.com/fadeaway20242024/vox-video-director/raw/main/assets/showcase/zhenghe-yuanboxiaoshu-30s.mp4"></video>
 
-<b>▶ "The evolution of Chinese civilization" · 30s</b>
+[Open or download the showcase video](assets/showcase/zhenghe-yuanboxiaoshu-30s.mp4)
+
+<b>▶ "Zheng He: One Fleet" · 30s · Volcengine/Doubao narration</b>
 
 </div>
 
