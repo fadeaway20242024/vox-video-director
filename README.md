@@ -22,22 +22,22 @@ https://github.com/user-attachments/assets/84524272-5390-445b-afcf-272f30f14a1f
 
 </div>
 
+### Keyframes from the showcase
+
 <table>
   <tr>
-    <td width="25%"><a href="https://github.com/user-attachments/assets/216cd62f-6314-456c-94cf-1090b8559a22"><img src="assets/thumbs/football.jpg" width="100%" alt="How football conquered the world"></a></td>
-    <td width="25%"><a href="https://github.com/user-attachments/assets/561788b1-5615-4828-b3f8-b24ae5ad7bcd"><img src="assets/thumbs/mexican.jpg" width="100%" alt="Mexican street food"></a></td>
-    <td width="25%"><a href="https://github.com/user-attachments/assets/f69f072f-f50a-41ba-9e66-7ed0aae4ddc0"><img src="assets/thumbs/money.jpg" width="100%" alt="A brief history of money"></a></td>
-    <td width="25%"><a href="https://github.com/user-attachments/assets/b9ff526f-577f-4acb-aafe-a2519a9b7c1c"><img src="assets/thumbs/silicon-valley.jpg" width="100%" alt="A brief history of Silicon Valley"></a></td>
+    <td width="25%"><img src="assets/keyframes/01-route.jpg" width="100%" alt="Route from Nanjing"></td>
+    <td width="25%"><img src="assets/keyframes/04-artifacts.jpg" width="100%" alt="Tribute and artifacts"></td>
+    <td width="25%"><img src="assets/keyframes/07-voyage.jpg" width="100%" alt="Fleet at sea"></td>
+    <td width="25%"><img src="assets/keyframes/10-significance.jpg" width="100%" alt="The significance of the voyage"></td>
   </tr>
   <tr>
-    <td align="center"><sub>Football history · 60s</sub></td>
-    <td align="center"><sub>Mexican street food · 60s</sub></td>
-    <td align="center"><sub>A brief history of money · 60s</sub></td>
-    <td align="center"><sub>Silicon Valley history · 60s</sub></td>
+    <td align="center"><sub>Route from Nanjing</sub></td>
+    <td align="center"><sub>Tribute and artifacts</sub></td>
+    <td align="center"><sub>Fleet at sea</sub></td>
+    <td align="center"><sub>The significance of the voyage</sub></td>
   </tr>
 </table>
-
-<p align="center"><sub><em>▶ more films — click any thumbnail to play</em></sub></p>
 
 ---
 
