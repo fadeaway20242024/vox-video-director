@@ -14,7 +14,7 @@ usable by any coding agent (Claude Code, Codex, etc.).
 
 <div align="center">
 
-https://github.com/user-attachments/assets/5fb6d13a-f1d8-4938-a9c8-059d0faab20e
+https://github.com/user-attachments/assets/84524272-5390-445b-afcf-272f30f14a1f
 
 [Open or download the showcase video](assets/showcase/zhenghe-yuanboxiaoshu-30s.mp4)
 

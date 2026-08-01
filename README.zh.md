@@ -12,7 +12,7 @@ ImageGen 图片提示词、Google Omni 视频提示词、火山/豆包旁白、�
 
 <div align="center">
 
-https://github.com/user-attachments/assets/5fb6d13a-f1d8-4938-a9c8-059d0faab20e
+https://github.com/user-attachments/assets/84524272-5390-445b-afcf-272f30f14a1f
 
 [打开或下载展示视频](assets/showcase/zhenghe-yuanboxiaoshu-30s.mp4)
 
