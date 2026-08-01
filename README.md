@@ -16,7 +16,7 @@ usable by any coding agent (Claude Code, Codex, etc.).
 
 https://github.com/user-attachments/assets/84524272-5390-445b-afcf-272f30f14a1f
 
-[Open or download the showcase video](assets/showcase/zhenghe-yuanboxiaoshu-30s.mp4)
+[Open or download the showcase video](assets/showcase/vox-zhenghe-30s.mp4)
 
 <b>▶ "Zheng He: One Fleet" · 30s · Volcengine/Doubao narration</b>
 
